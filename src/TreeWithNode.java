@@ -237,34 +237,42 @@ public class TreeWithNode {
 	
 	public boolean delete(int valorBuscado){
 		if (this.isEmpty())	//O(1)
-			return false;	//Si no hay elementos retorna lista vacía
+			return false;
 		else
-			return this.delete(this.raiz, this.raiz, valorBuscado);	//O(n)
+			return this.delete(this.raiz, null, valorBuscado);	//O(n)
 	}
 	
 	
 	/* Retorna si pudo eliminar un elemento del árbol o no: recorre los nodos del árbol,
 	 * por izquierda o derecha dependiendo si el valor buscado es menor o mayor al del nodo
 	 * actual. Si coinciden los valores, se procede a eliminar según cuál sea el caso:
-	 * si el nodo es hoja, si tiene un hijo, o si el nodo tiene 2 hijos*/
+	 * si el nodo es hoja, si tiene un hijo, o si el nodo tiene 2 hijos, y a su vez considera
+	 * el caso de ser la raíz*/
 	
-	//Complejidad: O(3h) => O(h) donde h es la altura del árbol (la rama más larga)
+	//Complejidad: O(4h) => O(h) donde h es la altura del árbol (la rama más larga)
 	//En el peor caso tiene que ir al último nodo de la rama más larga.
 	
 	private boolean delete(TreeNode actual, TreeNode padre, int valorBuscado){
 		
+		
 		if(valorBuscado == actual.getValor()){	//Si encontró el valor
 			
-			if(actual.getIzq() != null && actual.getDer() != null){
-				borrarPadreConHijos(padre, actual);	//O(h)
-			}
+			if(padre == null)	//es la raíz
+				borrarRaiz();	//O(h)
 			else{
-				if(actual.getIzq() == null && actual.getDer() == null){
-					borrarHoja(padre, actual);	//O(1)
+				
+				if(actual.getIzq() != null && actual.getDer() != null){
+					borrarPadreConHijos(padre, actual);	//O(h)
 				}
 				else{
-					borrarPadreConUnHijo(actual);	//O(1)
+					if(actual.getIzq() == null && actual.getDer() == null){
+						borrarHoja(padre, actual);	//O(1)
+					}
+					else{
+						borrarPadreConUnHijo(padre, actual);	//O(1)
+					}
 				}
+				
 			}
 			
 			return true;
@@ -291,6 +299,41 @@ public class TreeWithNode {
 	}
 
 	
+	/*En este método se analizan los 3 casos posibles de la situación de la raíz
+	 *para eliminarla: en el caso que tenga dos hijos, busca el elemento más
+	 *a la derecha de su subárbol izquierdo (el mayor de sus menores) e intercambia
+	 *el valor de la raíz con este último, haciendo los cambios necesarios para
+	 *mantener la integridad del árbol. En el caso que no tenga hijos, setea al nodo
+	 *raíz a null, y sino la raíz pasa apuntar al único hijo que tenga.*/
+	
+	//Complejidad: O(h) => O(h) donde h es la altura del árbol (la rama más larga)
+	//En el peor caso la rama más larga del árbol es la que se encuentra más
+	//más a la derecha del subárbol izquierdo y debe llegar hasta su último árco.
+	
+	private void borrarRaiz() {
+		
+		if(this.raiz.getIzq() != null && this.raiz.getDer() != null){	//tiene dos hijos
+			//busco el valor mayor del nodo del subarbol izquierdo de la raíz
+			int valorAIntercambiar = getValorMayorDeMenores(this.raiz.getIzq(), this.raiz); //O(h)
+			this.raiz.setValor(valorAIntercambiar);
+		}
+		else{	//es hoja
+			if(this.raiz.getIzq() == null && this.raiz.getDer() == null){
+				this.raiz = null;
+			}
+			else{	//tiene algun hijo
+				if(this.raiz.getIzq() != null){	//tiene subarbol izquierdo
+					this.raiz = this.raiz.getIzq();	//ahora la raiz apunta al subarbol izquierdo
+				}
+				else{	//tiene subarbol derecho
+					this.raiz = this.raiz.getDer();	//ahora la raiz apunta al subarbol derecho
+				}
+			}
+		}
+		
+	}
+
+
 	/*Busca el valor mayor de la rama menor (el más a la derecha de la rama izquierda)
 	 * del nodo a eliminar, para luego pisar el valor de ese nodo.*/
 	
@@ -302,12 +345,7 @@ public class TreeWithNode {
 		
 		//busco el valor mayor del nodo del subarbol izquierdo al nodo
 		int valorAIntercambiar = getValorMayorDeMenores(nodoAEliminar.getIzq(), nodoAEliminar); //O(h)
-		
-		if(padre == nodoAEliminar)	//si soy la raíz
-			padre.setValor(valorAIntercambiar);
-		
-		else{
-			
+
 			if(padre.getIzq() == nodoAEliminar){	//si el nodo a eliminar es el izquierdo
 				TreeNode izq = padre.getIzq();
 				izq.setValor(valorAIntercambiar);	
@@ -317,8 +355,6 @@ public class TreeWithNode {
 				der.setValor(valorAIntercambiar);
 				
 			}
-			
-		}
 		
 	}
 	
@@ -339,7 +375,7 @@ public class TreeWithNode {
 			int valor = actual.getValor();
 			
 			if(actual.getIzq() != null){	//tiene un hijo a la izquierda, intercambio valores y elimino al hijo izq
-				borrarPadreConUnHijo(actual);	//O(1)
+				borrarPadreConUnHijo(padre, actual);	//O(1)
 			}
 			borrarHoja(padre, actual);	//lo borro porque su valor va a reemplazar al nodo que se busca eliminar
 			return valor;
@@ -365,22 +401,19 @@ public class TreeWithNode {
 	}
 
 	
-	/* Desvincula del árbol al nodo correspondiente. Asigna el valor de su hijo,
-	 * al padre (nodo a borrar) pisando el valor y borra al hijo del árbol.*/
+	/* Desvincula al nodo a eliminar del árbol haciendo que el padre
+	 * del mismo pase a apuntar a su hijo (izq o der según corresponda)
+	 * del nodo a borrar.*/
 	
 	//Complejidad: O(1)
 	
-	private void borrarPadreConUnHijo(TreeNode nodoAEliminar) {
+	private void borrarPadreConUnHijo(TreeNode padre, TreeNode nodoAEliminar) {
 		
-		if(nodoAEliminar.getIzq() != null){
-			TreeNode izq = nodoAEliminar.getIzq();
-			nodoAEliminar.setValor(izq.getValor());
-			nodoAEliminar.setIzq(null);
+		if(nodoAEliminar.getIzq() != null){	// tiene hijo a la izquierda
+			padre.setIzq(nodoAEliminar.getIzq());	//el padre pasa a apuntar al único hijo del nodo a borrar
 		}
-		else{
-			TreeNode der = nodoAEliminar.getDer();
-			nodoAEliminar.setValor(der.getValor());
-			nodoAEliminar.setRight(null);
+		else{	//tiene hijo a la derecha
+			padre.setRight(nodoAEliminar.getDer());	//desvinculo al nodo del árbol
 		}
 		
 	}
