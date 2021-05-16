@@ -239,7 +239,7 @@ public class TreeWithNode {
 		if (this.isEmpty())	//O(1)
 			return false;
 		else
-			return this.delete(this.raiz, null, valorBuscado);	//O(n)
+			return this.delete(this.raiz, null, valorBuscado);	//O(h)
 	}
 	
 	
@@ -337,7 +337,7 @@ public class TreeWithNode {
 	/*Busca el valor mayor de la rama menor (el más a la derecha de la rama izquierda)
 	 * del nodo a eliminar, para luego pisar el valor de ese nodo.*/
 	
-	//Complejidad: O(3h)->O(h), donde h es la altura del árbol.
+	//Complejidad: O(h), donde h es la altura del árbol.
 	//En el peor caso la rama más larga del árbol es la que se encuentra más
 	//más a la derecha del subárbol izquierdo y debe llegar hasta su último árco.
 	
