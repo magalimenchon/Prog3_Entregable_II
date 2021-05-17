@@ -376,8 +376,8 @@ public class TreeWithNode {
 			
 			if(actual.getIzq() != null){	//tiene un hijo a la izquierda, intercambio valores y elimino al hijo izq
 				borrarPadreConUnHijo(padre, actual);	//O(1)
-			}
-			borrarHoja(padre, actual);	//lo borro porque su valor va a reemplazar al nodo que se busca eliminar
+			}else
+				borrarHoja(padre, actual);	//lo borro porque su valor va a reemplazar al nodo que se busca eliminar
 			return valor;
 			
 		}
