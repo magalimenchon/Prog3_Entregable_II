@@ -403,17 +403,29 @@ public class TreeWithNode {
 	
 	/* Desvincula al nodo a eliminar del árbol haciendo que el padre
 	 * del mismo pase a apuntar a su hijo (izq o der según corresponda)
-	 * del nodo a borrar.*/
+	 * del nodo a borrar, manteniendo la vinculación del lado izq o derecho,
+	 * según donde este posicionado el nodo a eliminar con respecto al padre.*/
 	
 	//Complejidad: O(1)
 	
 	private void borrarPadreConUnHijo(TreeNode padre, TreeNode nodoAEliminar) {
 		
-		if(nodoAEliminar.getIzq() != null){	// tiene hijo a la izquierda
-			padre.setIzq(nodoAEliminar.getIzq());	//el padre pasa a apuntar al único hijo del nodo a borrar
+		if(padre.getIzq() == nodoAEliminar){	//si el nodo a borrar es el de la izq
+			
+			if(nodoAEliminar.getDer() != null){	// tiene hijo a la izquierda
+				padre.setIzq(nodoAEliminar.getDer());	//el padre pasa a apuntar al único hijo derecho del nodo a borrar
+			}
+			else{	//tiene hijo a la derecha
+				padre.setIzq(nodoAEliminar.getIzq());	//el padre pasa a apuntar al único hijo izquierdo del nodo a eliminar
+			}
 		}
-		else{	//tiene hijo a la derecha
-			padre.setRight(nodoAEliminar.getDer());	//desvinculo al nodo del árbol
+		else{	//el nodo a borrar es el derecho
+			if(nodoAEliminar.getIzq() != null){	// tiene hijo a la derecha
+				padre.setRight(nodoAEliminar.getIzq());	//el padre pasa a apuntar al único hijo izquierdo del nodo a borrar
+			}
+			else{	//tiene hijo a la derecha
+				padre.setRight(nodoAEliminar.getDer());	//desvincula al nodo del arbol
+			}
 		}
 		
 	}
